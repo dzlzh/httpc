@@ -30,29 +30,29 @@ func NewClient(options ...ClientOption) *Client {
 	return client
 }
 
-func (c *Client) SetClient(client *http.Client) *Client {
-	c.client = client
+func (client *Client) SetClient(c *http.Client) *Client {
+	client.client = c
 
-	return c
+	return client
 }
 
-func (c *Client) SetTransport(tr *http.Transport) *Client {
-	c.transport = tr
-	c.client.Transport = tr
+func (client *Client) SetTransport(tr *http.Transport) *Client {
+	client.transport = tr
+	client.client.Transport = tr
 
-	return c
+	return client
 }
 
-func (c *Client) SetProxy(proxyUrl string) *Client {
+func (client *Client) SetProxy(proxyUrl string) *Client {
 	proxy, _ := url.Parse(proxyUrl)
-	c.transport.Proxy = http.ProxyURL(proxy)
+	client.transport.Proxy = http.ProxyURL(proxy)
 
-	return c
+	return client
 }
 
-func (c *Client) SetTimeout(t time.Duration) *Client {
-	c.client.Timeout = t
-	return c
+func (client *Client) SetTimeout(t time.Duration) *Client {
+	client.client.Timeout = t
+	return client
 }
 
 func Proxy(proxyUrl string) ClientOption {

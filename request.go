@@ -98,7 +98,7 @@ func (r *Request) Send() *Request {
 	}
 
 	go func() {
-		r.response, err = r.client.client.Do(r.request)
+		r.response, r.err = r.client.client.Do(r.request)
 		r.ch <- struct{}{}
 		close(r.ch)
 	}()

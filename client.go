@@ -6,63 +6,63 @@ import (
 	"time"
 )
 
-type HTTPClientOption func(*HTTPClient)
+type ClientOption func(*Client)
 
-type HTTPClient struct {
+type Client struct {
 	client    *http.Client
 	transport *http.Transport
 }
 
-func NewHTTPClient(options ...HTTPClientOption) *HTTPClient {
+func NewClient(options ...ClientOption) *Client {
 	tr := &http.Transport{}
 
-	client := &http.Client{
+	c := &http.Client{
 		Transport: tr,
 		Timeout:   30 * time.Second,
 	}
 
-	httpClient := &HTTPClient{client: client, transport: tr}
+	client := &Client{client: c, transport: tr}
 
 	for _, option := range options {
-		option(httpClient)
+		option(client)
 	}
 
-	return httpClient
+	return client
 }
 
-func (httpClient *HTTPClient) SetClient(client *http.Client) *HTTPClient {
-	httpClient.client = client
+func (c *Client) SetClient(client *http.Client) *Client {
+	c.client = client
 
-	return httpClient
+	return c
 }
 
-func (httpClient *HTTPClient) SetTransport(tr *http.Transport) *HTTPClient {
-	httpClient.transport = tr
-	httpClient.client.Transport = tr
+func (c *Client) SetTransport(tr *http.Transport) *Client {
+	c.transport = tr
+	c.client.Transport = tr
 
-	return httpClient
+	return c
 }
 
-func (httpClient *HTTPClient) SetProxy(proxyUrl string) *HTTPClient {
+func (c *Client) SetProxy(proxyUrl string) *Client {
 	proxy, _ := url.Parse(proxyUrl)
-	httpClient.transport.Proxy = http.ProxyURL(proxy)
+	c.transport.Proxy = http.ProxyURL(proxy)
 
-	return httpClient
+	return c
 }
 
-func (httpClient *HTTPClient) SetTimeout(t time.Duration) *HTTPClient {
-	httpClient.client.Timeout = t
-	return httpClient
+func (c *Client) SetTimeout(t time.Duration) *Client {
+	c.client.Timeout = t
+	return c
 }
 
-func Proxy(proxyUrl string) HTTPClientOption {
-	return func(httpClient *HTTPClient) {
-		httpClient.SetProxy(proxyUrl)
+func Proxy(proxyUrl string) ClientOption {
+	return func(client *Client) {
+		client.SetProxy(proxyUrl)
 	}
 }
 
-func Timeout(t time.Duration) HTTPClientOption {
-	return func(httpClient *HTTPClient) {
-		httpClient.SetTimeout(t)
+func Timeout(t time.Duration) ClientOption {
+	return func(client *Client) {
+		client.SetTimeout(t)
 	}
 }

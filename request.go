@@ -39,7 +39,7 @@ func (r *Request) SetMethod(method string) *Request {
 	return r
 }
 
-func (r *Request) SetUrl(url string) *Request {
+func (r *Request) SetURL(url string) *Request {
 	r.url = url
 	return r
 }

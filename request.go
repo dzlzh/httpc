@@ -30,7 +30,6 @@ func NewRequest(c *Client) *Request {
 		headers: map[string]string{"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"},
 		cookies: new([]*http.Cookie),
 		query:   url.Values{},
-		ch:      make(chan struct{}, 1),
 	}
 }
 
@@ -97,6 +96,7 @@ func (r *Request) Send() *Request {
 		r.request.AddCookie(v)
 	}
 
+	r.ch = make(chan struct{}, 1)
 	go func() {
 		r.response, r.err = r.client.client.Do(r.request)
 		r.ch <- struct{}{}

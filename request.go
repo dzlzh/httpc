@@ -1,7 +1,9 @@
 package httpc
 
 import (
+	"bytes"
 	"compress/gzip"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -16,8 +18,10 @@ type Request struct {
 	url      string
 	headers  map[string]string
 	cookies  *[]*http.Cookie
+	body     io.Reader
 	query    url.Values
-	data     string
+	form     url.Values
+	json     []byte
 	debug    bool
 	err      error
 	ch       chan struct{}
@@ -30,6 +34,7 @@ func NewRequest(c *Client) *Request {
 		headers: map[string]string{"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"},
 		cookies: new([]*http.Cookie),
 		query:   url.Values{},
+		form:    url.Values{},
 	}
 }
 
@@ -68,8 +73,18 @@ func (r *Request) SetQuery(key, value string) *Request {
 	return r
 }
 
-func (r *Request) SetData(data string) *Request {
-	r.data = data
+func (r *Request) SetBody(body io.Reader) *Request {
+	r.body = body
+	return r
+}
+
+func (r *Request) SetForm(key, value string) *Request {
+	r.form.Set(key, value)
+	return r
+}
+
+func (r *Request) SetJson(json []byte) *Request {
+	r.json = json
 	return r
 }
 
@@ -82,7 +97,17 @@ func (r *Request) Send() *Request {
 	}
 	url.RawQuery = r.query.Encode()
 
-	r.request, err = http.NewRequest(r.method, url.String(), strings.NewReader(r.data))
+	if r.body == nil {
+		if r.json != nil {
+			r.headers["Content-Type"] = "application/json"
+			r.body = bytes.NewReader(r.json)
+		} else if len(r.form) > 0 {
+			r.headers["Content-Type"] = "multipart/form-data"
+			r.body = strings.NewReader(r.form.Encode())
+		}
+	}
+
+	r.request, err = http.NewRequest(r.method, url.String(), r.body)
 	if err != nil {
 		r.err = err
 		return r

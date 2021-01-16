@@ -74,17 +74,27 @@ func (r *Request) SetQuery(key, value string) *Request {
 }
 
 func (r *Request) SetBody(body io.Reader) *Request {
+	r.Reset()
 	r.body = body
 	return r
 }
 
 func (r *Request) SetForm(key, value string) *Request {
+	r.Reset()
 	r.form.Set(key, value)
 	return r
 }
 
 func (r *Request) SetJson(json []byte) *Request {
+	r.Reset()
 	r.json = json
+	return r
+}
+
+func (r *Request) Reset() *Request {
+	r.json = []byte("")
+	r.form = url.Values{}
+	r.body = nil
 	return r
 }
 
@@ -97,17 +107,18 @@ func (r *Request) Send() *Request {
 	}
 	url.RawQuery = r.query.Encode()
 
-	if r.body == nil {
+	body := r.body
+	if body == nil {
 		if r.json != nil {
 			r.headers["Content-Type"] = "application/json"
-			r.body = bytes.NewReader(r.json)
+			body = bytes.NewReader(r.json)
 		} else if len(r.form) > 0 {
 			r.headers["Content-Type"] = "multipart/form-data"
-			r.body = strings.NewReader(r.form.Encode())
+			body = strings.NewReader(r.form.Encode())
 		}
 	}
 
-	r.request, err = http.NewRequest(r.method, url.String(), r.body)
+	r.request, err = http.NewRequest(r.method, url.String(), body)
 	if err != nil {
 		r.err = err
 		return r

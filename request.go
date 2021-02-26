@@ -74,19 +74,16 @@ func (r *Request) SetQuery(key, value string) *Request {
 }
 
 func (r *Request) SetBody(body io.Reader) *Request {
-	r.Reset()
 	r.body = body
 	return r
 }
 
 func (r *Request) SetForm(key, value string) *Request {
-	r.Reset()
 	r.form.Set(key, value)
 	return r
 }
 
 func (r *Request) SetJson(json []byte) *Request {
-	r.Reset()
 	r.json = json
 	return r
 }

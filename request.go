@@ -113,7 +113,7 @@ func (r *Request) Send() *Request {
 			r.headers["Content-Type"] = "application/json"
 			body = bytes.NewReader(r.json)
 		} else if len(r.form) > 0 {
-			r.headers["Content-Type"] = "multipart/form-data"
+			r.headers["Content-Type"] = "application/x-www-form-urlencoded"
 			body = strings.NewReader(r.form.Encode())
 		}
 	}

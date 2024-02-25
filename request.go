@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -89,9 +88,12 @@ func (r *Request) SetJson(json []byte) *Request {
 }
 
 func (r *Request) Reset() *Request {
-	r.json = []byte("")
-	r.form = url.Values{}
+	r.cookies = new([]*http.Cookie)
+	r.url = ""
+	r.query = url.Values{}
 	r.body = nil
+	r.json = nil
+	r.form = url.Values{}
 	return r
 }
 
@@ -148,9 +150,9 @@ func (r *Request) End() (*http.Response, []byte, error) {
 	if r.response.Header.Get("Content-Encoding") == "gzip" {
 		reader, _ := gzip.NewReader(r.response.Body)
 		defer reader.Close()
-		bodyByte, _ = ioutil.ReadAll(reader)
+		bodyByte, _ = io.ReadAll(reader)
 	} else {
-		bodyByte, _ = ioutil.ReadAll(r.response.Body)
+		bodyByte, _ = io.ReadAll(r.response.Body)
 	}
 	_ = r.response.Body.Close()
 	return r.response, bodyByte, nil
